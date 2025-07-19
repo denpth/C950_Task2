@@ -1,3 +1,4 @@
+# A. Develop a hash table with insertion function
 # Custom Hash Table using chaining for collision handling
 class ChainingHashTable:
     """
@@ -10,7 +11,7 @@ class ChainingHashTable:
         for i in range(capacity):
             self.table.append([])
 
-    # A. Develop a hash table insertion function
+    
     def insert(self, key, item):
         """
         Inserts a new item into the hash table.

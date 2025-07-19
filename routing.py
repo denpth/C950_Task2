@@ -83,9 +83,15 @@ class Main:
         and provides a user interface for status checks.
         """
         # Strategic manual loading of trucks to ensure all constraints are met.
-        truck1 = {'packages': [15, 13, 14, 16, 19, 20, 1, 29, 30, 31, 34, 40, 6, 25], 'mileage': 0.0}
-        truck2 = {'packages': [3, 18, 36, 38, 9, 7, 22, 23, 24, 26, 10, 2, 37], 'mileage': 0.0}
-        truck3 = {'packages': [28, 32, 4, 5, 11, 12, 17, 21, 27, 35, 39, 8, 33], 'mileage': 0.0}
+        truck1_array = [1, 13, 14, 15, 16, 19, 20, 29, 30, 31, 34, 37, 40]
+        truck2_array = [3, 6, 18, 25, 27, 28, 32, 33, 35, 36, 38, 39]
+        truck3_array = [2, 4, 5, 7, 8, 9, 10, 11, 12, 17, 21, 22, 23, 24, 26]
+        truck1_array.sort()
+        truck2_array.sort()
+        truck3_array.sort()
+        truck1 = {'packages': truck1_array, 'mileage': 0.0}
+        truck2 = {'packages': truck2_array, 'mileage': 0.0}
+        truck3 = {'packages': truck3_array, 'mileage': 0.0}
 
         # --- Driver & Truck Departure Logic ---
         # Driver 1 and 2 leave at 8:00 AM
@@ -101,10 +107,6 @@ class Main:
 
         self.deliver_packages(truck3, truck3_actual_departure)
 
-        # --- Final Results and Verification ---
-        total_mileage = truck1['mileage'] + truck2['mileage'] + truck3['mileage']
-        print("✅ WGUPS Delivery Simulation Complete.")
-        print(f"Total mileage for all trucks: {total_mileage:.2f} miles.")
 
         print("\n--- Verifying All Delivery Deadlines ---")
         all_met = True
@@ -131,26 +133,48 @@ class Main:
                 user_time = datetime.timedelta(hours=int(h), minutes=int(m))
 
                 print(f"\n--- Status of all packages at {user_time} ---")
-                for i in range(1, 41):
-                    package = self.package_hash_table.search(i)
-
-                    # Temporarily set address for package 9 based on lookup time
-                    original_address, original_zip = package.address, package.zip_code
-                    if package.id == 9:
-                        if user_time < self.correction_time:
-                            package.address = "300 State St"  # The wrong address [cite: 6, 8]
-                            package.zip_code = "84103"  # The wrong zip code [cite: 6, 8]
-                        else:
-                            package.address = "410 S State St"
-                            package.zip_code = "84111"
-
-                    package.update_status(user_time)
-                    print(
-                        f"Package {package.id}: Status: {package.status}. Delivery Address: {package.address}, {package.zip_code}. Deadline: {package.deadline_str}. Delivery Time: {package.delivery_time or 'N/A'}")
-
-                    # Revert package 9 address for next loop integrity
-                    if package.id == 9:
-                        package.address, package.zip_code = original_address, original_zip
+                print("\U0001F69A Truck 1")
+                self.print_truck(truck1_array, user_time)
+                print("\U0001F69A Truck 2")
+                self.print_truck(truck2_array, user_time)
+                print("\U0001F69A Truck 3")
+                self.print_truck(truck3_array, user_time)
 
             except (ValueError, IndexError):
                 print("Invalid time format. Please use HH:MM.")
+
+         # --- Final Results and Verification ---
+        total_mileage = truck1['mileage'] + truck2['mileage'] + truck3['mileage']
+        print("✅ WGUPS Delivery Simulation Complete.")
+        print(f"Total mileage for all trucks: {total_mileage:.2f} miles.")
+
+    def print_truck(self, truck_array, user_time):
+        for i in truck_array:
+            package = self.package_hash_table.search(i)
+
+            # Temporarily set address for package 9 based on lookup time
+            original_address, original_zip = package.address, package.zip_code
+            if package.id == 9:
+                if user_time < self.correction_time:
+                    package.address = "300 State St"  # The wrong address [cite: 6, 8]
+                    package.zip_code = "84103"  # The wrong zip code [cite: 6, 8]
+                else:
+                    package.address = "410 S State St"
+                    package.zip_code = "84111"
+
+            package.update_status(user_time)
+            # Only show delivery time if package has been delivered at the queried time
+            if package.status == "Delivered":
+                print("\033[32m", end="")
+                delivery_time_display = package.delivery_time
+            elif package.status == "En Route":
+                print("\033[93m", end="")
+            else:
+                print("\033[31m", end="")
+                delivery_time_display = "N/A"
+            print(f"Package {package.id}: Status: {package.status}. Delivery Address: {package.address}, "
+                f"{package.zip_code}. Deadline: {package.deadline_str}. Delivery Time: {delivery_time_display} \033[0m")
+
+            # Revert package 9 address for next loop integrity
+            if package.id == 9:
+                package.address, package.zip_code = original_address, original_zip

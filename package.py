@@ -37,9 +37,9 @@ class Package:
 
     def update_status(self, current_time):
         """Updates the package status based on the current time."""
-        if self.delivery_time is None or current_time < self.departure_time:
+        if self.departure_time is None or current_time < self.departure_time:
              self.status = "At Hub"
-        elif current_time < self.delivery_time:
+        elif self.delivery_time is None or current_time < self.delivery_time:
             self.status = "En Route"
         else:
             self.status = "Delivered"

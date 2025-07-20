@@ -4,6 +4,20 @@ from chainingHash import ChainingHashTable
 from package import Package
 from load_package import load_package_data, load_distance_data, load_address_data, get_address_id, get_distance_between
 
+def format_time_24h(time_delta):
+    """Convert timedelta to 24-hour format string (HH:MM)."""
+    if time_delta is None:
+        return "N/A"
+    
+    total_seconds = int(time_delta.total_seconds())
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    
+    # Handle 24+ hour times by wrapping to next day
+    hours = hours % 24
+    
+    return f"{hours:02d}:{minutes:02d}"
+
 class Main:
     """Main class to orchestrate the WGUPS delivery simulation."""
 
@@ -94,9 +108,9 @@ class Main:
         truck3 = {'packages': truck3_array, 'mileage': 0.0}
 
         # --- Driver & Truck Departure Logic ---
-        # Driver 1 and 2 leave at 8:00 AM
+        # Driver 1 and 2 leave at 8:00 AM and 9:05 AM
         self.deliver_packages(truck1, datetime.timedelta(hours=8))
-        self.deliver_packages(truck2, datetime.timedelta(hours=8))
+        self.deliver_packages(truck2, datetime.timedelta(hours=9, minutes=5))
 
         # Determine when the first driver is free
         first_driver_free_time = min(truck1['finish_time'], truck2['finish_time'])
@@ -117,7 +131,7 @@ class Main:
                 all_met = False
             elif package.delivery_time > package.deadline_time:
                 print(
-                    f"❌ FAILED: Package {package.id} missed deadline! Delivered at {package.delivery_time}, Deadline was {package.deadline_time}")
+                    f"❌ FAILED: Package {package.id} missed deadline! Delivered at {format_time_24h(package.delivery_time)}, Deadline was {package.deadline_str}")
                 all_met = False
         if all_met:
             print("✅ Success! All packages were delivered on time.")
@@ -132,7 +146,7 @@ class Main:
                 (h, m) = user_time_str.split(':')
                 user_time = datetime.timedelta(hours=int(h), minutes=int(m))
 
-                print(f"\n--- Status of all packages at {user_time} ---")
+                print(f"\n--- Status of all packages at {format_time_24h(user_time)} ---")
                 print("\U0001F69A Truck 1")
                 self.print_truck(truck1_array, user_time)
                 print("\U0001F69A Truck 2")
@@ -166,9 +180,10 @@ class Main:
             # Only show delivery time if package has been delivered at the queried time
             if package.status == "Delivered":
                 print("\033[32m", end="")
-                delivery_time_display = package.delivery_time
+                delivery_time_display = format_time_24h(package.delivery_time)
             elif package.status == "En Route":
                 print("\033[93m", end="")
+                delivery_time_display = "N/A"
             else:
                 print("\033[31m", end="")
                 delivery_time_display = "N/A"

@@ -28,7 +28,8 @@ def load_distance_data(filename):
     with open(filename) as distance_file:
         distance_data = csv.reader(distance_file, delimiter=',')
         for row in distance_data:
-            distances.append(row)
+            # Skip the first column which contains row identifiers
+            distances.append(row[1:])
     return distances
 
 def load_address_data(filename):

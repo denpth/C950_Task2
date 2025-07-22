@@ -184,8 +184,11 @@ class Main:
             elif package.status == "En Route":
                 print("\033[93m", end="")
                 delivery_time_display = "N/A"
-            else:
+            elif package.status == "Delayed":
                 print("\033[31m", end="")
+                delivery_time_display = "Delayed"
+            else:    
+                print("\033[0m", end="")
                 delivery_time_display = "N/A"
             print(f"Package {package.id}: Status: {package.status}. Delivery Address: {package.address}, "
                 f"{package.zip_code}. Deadline: {package.deadline_str}. Delivery Time: {delivery_time_display} \033[0m")

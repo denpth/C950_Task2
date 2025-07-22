@@ -38,7 +38,10 @@ class Package:
     def update_status(self, current_time):
         """Updates the package status based on the current time."""
         if self.departure_time is None or current_time < self.departure_time:
-             self.status = "At Hub"
+            if current_time < datetime.timedelta(hours=9, minutes=5) and self.id in [6, 25, 28, 32]:
+                self.status = "Delayed"
+            else:    
+                self.status = "At Hub"
         elif self.delivery_time is None or current_time < self.delivery_time:
             self.status = "En Route"
         else:

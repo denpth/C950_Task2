@@ -16,3 +16,5 @@ jobs:
           python-version: '3.12'
       - name: Compile Python sources
         run: python -m py_compile *.py
+      - name: Run delivery simulation smoke test
+        run: printf 'exit\n' | python main.py
